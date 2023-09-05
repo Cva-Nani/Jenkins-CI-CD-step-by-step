@@ -29,12 +29,7 @@ pipeline {
     tools {
         maven 'maven'
     }
-    environment {
-        registry = "cvaa/petclinic7"
-        registryCredential = "DOCK_CRED"
-        dockerImage = ''
-    }
-
+    
     stages {
         stage('git clone') {
             steps {
@@ -92,7 +87,7 @@ As Well As Sonatype/nexus3 pipeline syntex also
                       Artifacts -> add to 
                                           ArtifactId:
                                           Type:jar or war
-                                          File: 
+                                          File: target/spring-petclinic-2.7.0-SNAPSHOT.jar  =>(Go to jenkins Dash Board-> choose your pipeline project name and select that pipeline-> open to the Build History and succes console out put->select the Workspaces-> and select to /var/lib/jenkins/workspace/hllo on-> spring-petclinic-2.7.0-SNAPSHOT.jar) 
                     
-
+and then Generate Pipeline Script
 
