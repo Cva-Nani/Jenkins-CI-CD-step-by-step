@@ -4,7 +4,7 @@ sudo apt update
 sudo apt install docker.io -y
 sudo docker search tomcat
 sudo docker pull tomee
-sudo docker run -d --name tomcat -p 8081:8081 tomcat:lts
+sudo docker run -d --name tomcat -p 8080:8080 tomcat:lts
 sudo docker exec -it (container-ID) bash
 cd conf
 apt update
