@@ -1,0 +1,98 @@
+For sonarqube installation:
+-------------------------
+
+sudo apt update or sudo yum update
+sudo apt install docker.io -y
+sudo docker search nexus3
+sudo docker run -d --name nexus_repo -p 8081:8081 sonatype/nexus3
+
+Integrates the nexus with jenkins
+------------------------------------------
+
+On Sontype/nexus3 server:
+    create the repository => click to the server administration and configuaration ->select the Repository-> create new repository-> select to the maven2 (hosted) -> repo Name -> create repository
+    click to the browse server contents 
+
+On Jenkins server:
+
+Go to jenkins Dash Board->enable plugin Nexus pipeline => manage Jenkins->manage plugins->search in available plugin ->Nexus Artifact Uploader  ->install with out restart
+And then Go to manage jenkins->global tool configuration (Tools)-> add maven (maven installation)
+give a Git Hub credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> create credentials with kind is username with password
+give a sonatype/Nexus3 credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> create credentials with kind is username with password
+
+Run Pipeline job
+
+============================================================================================================================================================================================================================
+
+pipeline {
+    agent any
+    tools {
+        maven 'maven'
+    }
+    environment {
+        registry = "cvaa/petclinic7"
+        registryCredential = "DOCK_CRED"
+        dockerImage = ''
+    }
+
+    stages {
+        stage('git clone') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']],
+                extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED',
+                url: 'https://github.com/Cvaaaa/spring-petclinic-docker.git']])
+            }
+        }
+        stage('UNIT Testing') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+        stage('upload to nexus') {
+            steps {
+                script {
+                nexusArtifactUploader artifacts: [[artifactId: 'spring-petclinic',
+                classifier: '',
+                file: 'target/spring-petclinic-2.7.0-SNAPSHOT.jar',
+                type: 'jar']],
+                credentialsId: 'NEXUS_CRED',
+                groupId: 'org.springframework.samples',
+                nexusUrl: '54.173.245.9:8081',
+                nexusVersion: 'nexus3',
+                protocol: 'http',
+                repository: 'bb_bb',
+                version: '2.7.0-SNAPSHOT'
+                }
+            }
+        }
+    }
+}
+
+
+===============================================================================================================================================
+
+Note: click on pipeline syntex 
+  Snippet Generator-> sample steps -> Search Checkout:checkout from the version control
+                                      Paste to the git code in git repository URL and add git credentials -> specify the Branch Name -> And Then Generate Pipeline Script
+            Ex: checkout scmGit(branches: [[name: '*/main']],
+                extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED',
+                url: 'https://github.com/Cvaaaa/spring-petclinic-docker.git']])
+
+
+As Well As Sonatype/nexus3 pipeline syntex also
+  Snippet Generator-> sample steps -> Search nexusArtifactoryUploader: Nexus Artifactory Uploader
+                      Nexus Version: Nexus 3
+                      Protocol: HTTP
+                      Nexus URL: 54.208.154.212:8081
+                      Add nexus credential
+    Go to Git Hub--> Choose your git repo open to the pom.xml file 
+                      GroupId: 
+                      Version:
+                      Repository: nexus repository name
+                      Artifacts -> add to 
+                                          ArtifactId:
+                                          Type:jar or war
+                                          File: 
+                    
+
+
