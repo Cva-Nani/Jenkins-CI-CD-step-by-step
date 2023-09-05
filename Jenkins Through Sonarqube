@@ -33,12 +33,6 @@ pipeline {
     tools {
         maven 'maven'
     }
-    environment {
-        registry = "cvaa/petclinic7"
-        registryCredential = "DOCK_CRED"
-        dockerImage = ''
-    }
-
     stages {
         stage('git clone') {
             steps {
@@ -79,4 +73,9 @@ Note: click on pipeline syntex
                 extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED',
                 url: 'https://github.com/Cvaaaa/spring-petclinic-docker.git']])
 
-   
+
+   As Well As Sonarqube pipeline syntex also
+     Snippet Generator-> sample steps -> Search withSonarQubeEnv:PrepareSonarQubeScannerEnvironment
+             and then add to Sonarqube Credentintials -> Generate Pipeline Script
+        Ex: withSonarQubeEnv(credentialsId: 'SONAR_CRED') {
+                        
