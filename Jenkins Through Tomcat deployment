@@ -4,7 +4,8 @@ sudo apt update
 sudo apt install docker.io -y
 sudo docker search tomcat
 sudo docker pull tomee
-sudo docker exec -it container ID bash
+sudo docker run -d --name tomcat -p 8081:8081 tomcat:lts
+sudo docker exec -it (container-ID) bash
 cd conf
 apt update
 apt install nano
