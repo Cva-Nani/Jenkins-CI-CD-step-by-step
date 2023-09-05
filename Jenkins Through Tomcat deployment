@@ -79,3 +79,11 @@ Note: click on pipeline syntex
                                       Paste to the git code in git repository URL and add git credentials -> specify the Branch Name -> And Then Generate Pipeline Script
           Ex: checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED', url: 'https://github.com/Cvaaaa/maven-web-app.git']])
 
+As Well As Tomcat pipeline syntex also 
+  Snippet Generator-> sample steps -> Search deploy: Deploy war/ear to a container
+                                      WAR/EAR files-> war or ear
+                                      context path-> any name 
+                                      add a container-> select to the Tomcat 9.X remote
+                              And then add to Tomcat Credentintials and Tomcat URL -> Generate Pipeline Script
+          Ex: deploy adapters: [tomcat9(credentialsId: 'tomee', path: '', url: 'http://50.16.20.155:8080')], contextPath: '01-maven-web-app.war', war: '**/*.war
+
