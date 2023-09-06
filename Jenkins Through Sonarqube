@@ -13,13 +13,17 @@ Integrates the sonarqube with jenkins
 On Sonarqube server:
    Generate a sonarqube token to authenticate from Jenkins
 
+   Go to sonarqube Dashboard=> create project-> select to the manually-> give a Project display name, Project key and Main branch name.-> set up-> select to the locally and generate to the token.
+                                                               (OR)
+   Go to sonarqube Dashboard=> select the administration-> security-> select to the users-> Update Tokens-> and Enter Token Name-> Generete token.
+
 On Jenkins server:
 
 Go to jenkins Dash Board->enable plugin sonar pipeline => manage Jenkins->manage plugins->search in available plugin ->sonarqube scanner ->install with out restart
 And then Go to manage jenkins->global tool configuration (Tools)-> add maven (maven installation)
 give a Git Hub credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> create credentials with kind is username with password
 give a Sonarqube credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> kind-> create credentials with kind is Secret text
-(sonarqube username:admin, password: copy and paste to the sonar qube tocken )
+(sonarqube username:admin, password: copy and paste to the sonar qube token)
 And then Go to manage jenkins->global tool configuration (Tools)-> add SonarQube Scanner installations (sonarqube scanner name)
 Go to manage jenkins-> global system configuration (System)-> select to SonarQube servers -> Environment variables-> Name:sonar-> Server URL: http://100.26.254.45:9000-> Server authentication token
 SonarQube authentication token. Mandatory when anonymous access is disabled.
