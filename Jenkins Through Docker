@@ -29,7 +29,7 @@ sudo service docker restart
 
 Go to jenkins Dash Board->enable plugin docker pipeline => manage Jenkins->manage plugins->search in available plugin ->Docker ->install with out restart
 And then Go to manage jenkins->global tool configuration (Tools)-> add maven (maven installation)
-
+give a Git Hub credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> create credentials with kind is username with password
 give docker credentials in global credentials => manage Jenkins-> Manage credentials->Click on System->Click on Global credentials-> click on add credentials-> create credentials with kind is usernamewithpassword
 
 Note: Id in the while creating credentials and registryCredential in the pipeline must be same
