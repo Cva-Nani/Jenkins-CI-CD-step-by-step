@@ -23,7 +23,7 @@ Go to jenkins Dash Board->enable plugin sonar pipeline => manage Jenkins->manage
 And then Go to manage jenkins->global tool configuration (Tools)-> add maven (maven installation)
 give a Git Hub credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> create credentials with kind is username with password
 give a Sonarqube credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> kind-> create credentials with kind is Secret text
-(sonarqube username:admin, password: copy and paste to the sonar qube token)
+(secret: copy and paste the sonarqube token)
 And then Go to manage jenkins->global tool configuration (Tools)-> add SonarQube Scanner installations (sonarqube scanner name)
 Go to manage jenkins-> global system configuration (System)-> select to SonarQube servers -> Environment variables-> Name:sonar-> Server URL: http://100.26.254.45:9000-> Server authentication token
 SonarQube authentication token. Mandatory when anonymous access is disabled.
