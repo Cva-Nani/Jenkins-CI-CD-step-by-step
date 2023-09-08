@@ -1,0 +1,104 @@
+
+On Jenkins server:
+-----------------
+Pre-requistes:
+1. Jenkins is up and running
+2. Docker installed on Jenkins instance.
+3. Docker and Docker pipelines plug-in are installed
+4. Repo created in ECR, Click here to know how to do that.
+5. port 8096 is opened up in firewall rules. 
+6. Create an IAM role with AmazonEC2ContainerRegistryFullAccess policy, attach to Jenkins EC2 instance
+
+On AWS console server:
+What are we going to do in this lab?
+1. Create a Repository in AWS ECR
+2. Create an IAM role with ContainerRegistryFullAccess
+3. Attach the IAM role to EC2 instance
+4. Login to AWS ECR using aws cli 
+5. Push docker image into ECR
+
+Pre-requisites:
+EC2 instance up and running with Docker installed
+Make sure you open port 8081
+Install aws cli
+
+Create a repo in ECR => Go to AWS console and search for ECR
+Click on Create Repository
+Enter name for your repo - all lower case and Click create repository-> create repository
+Once repo is created, choose the repo and click on view push commands. Note down the account ID
+
+Note the URL from step # 3 below, this will be used for tagging and pushing docker images into ECR.
+
+That's it, you have created repo successfully. Let us create docker images and push it to above repo in ECR.
+
+Create an IAM role
+You need to create an IAM role with AmazonEC2ContainerRegistryFullAccess policy.
+Go to AWS console, IAM, click on Roles. create a role
+
+Select AWS services, Click EC2, Click on Next permissions.
+ Now search for AmazonEC2ContainerRegistryFullAccess policy and click
+
+
+
+Skip on create tag.
+Now give a role name and create it.
+
+You need to assign the role to EC2 instance you have installed docker.
+
+Go to AWS console, click on EC2, select EC2 instance, Go to Actions --> Security--> Modify IAM role.=> Choose the role you have created from the dropdown.->Select the role and click on Apply.
+
+Now Login to EC2 instance where you have installed Docker. You must be able to connect to AWS ECR through AWS CLI which can be installed by
+sudo apt  install awscli -y
+
+Once AWS CLI is installed, you can verify the installation:
+aws --version
+
+Now you can login to AWS ECR using CLI:
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin your_acct_id.dkr.ecr.us-east-1.amazonaws.com
+
+
+
+=================================================================================================================================================
+
+pipeline {
+    agent any
+    
+    tools {
+        maven "Maven3"
+    }
+    
+    environment {
+        registry = "public.ecr.aws/u4s8r9w2/ecr11"
+    }
+    stages {
+        stage('git clone') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']],
+                extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED',
+                url: 'https://github.com/Cvaaaa/spring-petclinic-docker.git']])
+            }
+        }
+        
+        stage ('UNIT Testing') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                script {
+                    docker.build registry
+                }
+            }
+        }
+        stage('Push Image to Docker') {
+            steps {
+                script {
+                    sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/u4s8r9w2"
+                    sh "docker push public.ecr.aws/u4s8r9w2/ecr11:latest"
+                }
+            }
+        }
+    }
+}
