@@ -1,0 +1,144 @@
+--Pre-requisites:
+
+On Jenkins server::-
+========================
+Install AWSCLI:
+sudo apt install awscli
+
+Install the EKS and EKSCTL SETUP:
+--------------------------------
+AWS EKS SETUP:
+
+sudo su -
+curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mv ./kubectl /usr/local/bin 
+kubectl version --short --client
+
+EKSCTL SETUP:
+
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+mv /tmp/eksctl /usr/local/bin
+eksctl version
+
+CREATE THE KUBERENETES CLUSTER:
+Execute the below command to create kubernetes clusters
+eksctl create cluster --name demo-eks1 --region us-east-2 --nodegroup-name my-nodes --node-type t3.small --managed --nodes 2 
+
+On AWS console:
+Create an IAM Role and attache it to EC2 instance:-
+--------------------------------------------------
+Note: create IAM user with programmatic access if your bootstrap system is outside of AWS
+IAM user should have access to
+You need to create an IAM role with AmazonEC2ContainerRegistryFullAccess policy.
+Go to AWS console, IAM, click on Roles. create a role
+
+Select AWS services, Click EC2, Click on Next permissions.
+ Now search for AmazonEC2ContainerRegistryFullAccess policy and click
+
+Go to AWS console, click on EC2, select Jenkins EC2 instance, Go to Actions --> Security--> Modify IAM role.=> Choose the role you have created from the dropdown.->Select the role and click on Apply.
+
+==========================================================================================================================================================================================================
+On Jenkins server:
+
+Go to jenkins Dash Board->enable plugin kuberenetes pipeline => manage Jenkins->manage plugins->search in available plugin ->kubernetes Cli ->install with out restart
+And then Go to manage jenkins->global tool configuration (Tools)-> add maven (maven installation)
+give a Git Hub credentials in global credentials => manage Jenkins-> Manage credentials-> Click on System ->Click on Global-> click on add credentials -> create credentials with kind is "secret file".
+
+how to take secret file:-
+----------------------
+on Jenkins server:
+------------------
+Install the EKS and EKSCTL => create the kubernetes cluster
+
+Execute the below command to get kubeconfig info, copy the entire content of the file:
+cat /var/lib/jenkins/.kube/config
+
+Open your text editor or notepad, copy and paste the entire content and save in a file.
+We will upload this file.
+
+EX:
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJZUdydzEvSWIzakV3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TXpBNE1qRXdPREF6TlRCYUZ3MHpNekE0TVRnd09EQXpOVEJhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUNzajRKNkE3WU1RWk5uclI0cjNNUThrWFdQTFprT054R2NOQWp0TjBUMVppd0QyaFI3MGE1WDB5aU8KK1VGT3lCTnhlRDNvZUZNWUYxRlBpZUlLQSs5dG1HNkhrV1hMVHpSUVNnZ1BCYy9WekQ1Zi9TTWgrK2ZiV3I2Ngp1TW4wMFdvTTRITTk3RlNNL2NvTCtqYS96ZC9OemZjRFpLVUZaN1JvTFJ0Smd2aXNHTGFCWUtRMzdrc2Z6dEVxCmZSR055dU5QSGJURUVKT0ZxQUZ0R2VjTm93R0taN2FOaEpySThkZ3RmZXB3VGF6L2VZNndNRVJGYmtJVUJob20KRitpSVNWWTdpSUdwemlPTHh1UGVBWWtiUXNCWnUvb0lxU0tUeXVtRHRvek8wM2o5eWNTMkhiVlNhTzJLdG1QYgpZaGV6Y0cyZXZTZUJibTNYblhUeGxkaUVISE9MQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJRWnU2VkpZTzl2N0dsclNxeWtobk9pUGlxK01UQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQStRbkJVK0lRZQovd1h2aUlOckduL2xDVExvOWxUd0JZdyt3eXZRbU5EQzlkdzN3UmptSGIrZ01QSDY2TFpkYTg4TDFDbVAreGp5ClFBeWJ5aWVyMWZ1ZWt6Y3BGNFAwSFZRUmhzYUdkK3oyRTRjWWNmZmFGUXR5TzErZElJeUFNc1BMNzRBN21zZ3UKZ0U4d3FITVp6cFZGYTZCdXFDNlFrZlhhMTREYllZOGM5cWN0RGRTTFFuNkQ2UFpMTXhwTmZwY3FsNzAwVjFQVwo2eXJhYS9Rc1B5ajlwWlpHQlAxaGJ3MXJhR0ZWYnlvanpBZjh4b1lnRjQ5dzlLTGtITlNqVVhBZkRPZURWa1lUClljaUNJdnBiR3huRG9xUjg0RjRXTStJbGlWenBlS1cweTU5b0RPWjJoQ0pVMDFtcGtlNEpRTk1lZ2tkZXFWUU8KdzlmblUwZjZ2bHZxCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    server: https://E3C8A8B2E0071E7C3AC59A14F1CC477D.gr7.ap-south-1.eks.amazonaws.com
+  name: demo-eks.ap-south-1.eksctl.io
+contexts:
+- context:
+    cluster: demo-eks.ap-south-1.eksctl.io
+    user: i-0302926d4a084dee5@demo-eks.ap-south-1.eksctl.io
+  name: i-0302926d4a084dee5@demo-eks.ap-south-1.eksctl.io
+current-context: i-0302926d4a084dee5@demo-eks.ap-south-1.eksctl.io
+kind: Config
+preferences: {}
+users:
+- name: i-0302926d4a084dee5@demo-eks.ap-south-1.eksctl.io
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - eks
+      - get-token
+      - --output
+      - json
+      - --cluster-name
+      - demo-eks
+      - --region
+      - ap-south-1
+      command: aws
+      env:
+      - name: AWS_STS_REGIONAL_ENDPOINTS
+        value: regional
+      provideClusterInfo: false
+
+
+========================================================================================================================================================================
+
+
+pipeline {
+    agent any
+    
+    tools {
+        maven "Maven3"
+    }
+    stages {
+        stage('git clone') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']],
+                extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED',
+                url: 'https://github.com/Cvaaaa/spring-petclinic-docker.git']])
+            }
+        }
+        stage('UNIT Testing') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+        stage('Deploy to EKS') {
+            steps {
+                script {
+                    withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'K8s-CRED', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+                        sh "kubectl apply -f eks-deploy-k8s.yaml"
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+===================================================================================================================================================================================================
+
+Note: click on pipeline syntex 
+  Snippet Generator-> sample steps -> Search Checkout:checkout from the version control
+                                      Paste to the git code in git repository URL and add git credentials -> specify the Branch Name -> And Then Generate Pipeline Script
+            Ex: checkout scmGit(branches: [[name: '*/main']],
+                extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED',
+                url: 'https://github.com/Cvaaaa/spring-petclinic-docker.git']])
+ As Well As Deploy to EKS pipeline syntex also
+     Snippet Generator-> sample steps -> Search withSonarQubeEnv: WithKubeConfig:Configurekuberenetes CLI (kubectl)
+
+    EX: withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'K8s-CRED', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+
+And then sh "kubectl apply -f eks-deploy-k8s.yaml" => eks-deploy-k8s.yaml ->This is the kuberenetes yaml file in your git repository.
