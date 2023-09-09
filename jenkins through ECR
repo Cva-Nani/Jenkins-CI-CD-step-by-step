@@ -29,6 +29,22 @@ Once repo is created, choose the repo and click on view push commands. Note down
 
 Note the URL from step # 3 below, this will be used for tagging and pushing docker images into ECR.
 
+Retrieve an authentication token and authenticate your Docker client to your registry.
+Use the AWS CLI:
+
+Ex: aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 325838564244.dkr.ecr.us-east-1.amazonaws.com
+Note: If you receive an error using the AWS CLI, make sure that you have the latest version of the AWS CLI and Docker installed.
+
+Build your Docker image using the following command. For information on building a Docker file from scratch see the instructions here . You can skip this step if your image is already built:
+
+Ex: docker build -t cva .
+After the build completes, tag your image so you can push the image to this repository:
+
+Ex: docker tag sxs:latest 325838564244.dkr.ecr.us-east-1.amazonaws.com/cva:latest
+Run the following command to push this image to your newly created AWS repository:
+
+Ex: docker push 325838564244.dkr.ecr.us-east-1.amazonaws.com/cva:latest
+
 That's it, you have created repo successfully. Let us create docker images and push it to above repo in ECR.
 
 Create an IAM role
@@ -102,3 +118,25 @@ pipeline {
         }
     }
 }
+
+
+
+===========================================================================================================================================================
+
+Note: click on pipeline syntex 
+  Snippet Generator-> sample steps -> Search Checkout:checkout from the version control
+                                      Paste to the git code in git repository URL and add git credentials -> specify the Branch Name -> And Then Generate Pipeline Script
+            Ex: checkout scmGit(branches: [[name: '*/main']],
+                extensions: [], userRemoteConfigs: [[credentialsId: 'GIT_CRED',
+                url: 'https://github.com/Cvaaaa/spring-petclinic-docker.git']])
+
+registry = "public.ecr.aws/u4s8r9w2/ecr11"  --> This is the ECR repository URL 
+
+click on pipeline syntex 
+  Snippet Generator-> sample steps -> Search Checkout:sh 
+                                sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/u4s8r9w2" 
+                                sh "docker push public.ecr.aws/u4s8r9w2/cva:latest"
+
+    above commands also available on your ECR repository=> choose the repo and click on view push commands. 
+
+                 
