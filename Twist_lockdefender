@@ -1,0 +1,99 @@
+On AWS console:
+Create an IAM Role and attach it to EC2 instance:-
+--------------------------------------------------
+Note: create IAM user with programmatic access if your bootstrap system is outside of AWS
+IAM user should have access to
+we need to create an IAM role with AmazonEC2ContainerRegistryFullAccess policy.
+
+
+==========================================================================================================================================================================================================
+On Jenkins server:
+
+Go to jenkins Dash Board.
+Install the kuberenetes CLI plugins
+
+Add to the AWS Credentials =>  create credentials with kind is "AWS credentials"
+
+
+how to take secret file:-
+----------------------
+on Jenkins server:
+------------------
+Install the EKS and EKSCTL => create the kubernetes cluster
+
+Execute the below command to get kubeconfig info, copy the entire content of the file:
+KUBE CONFIG: cat /var/lib/jenkins/.kube/config
+
+give a EKS credentials in global credentials => create credentials with kind is "secret file".
+
+commands
+    1  eksctl create cluster --name deploy-eks1 --region us-west-1 --nodegroup-name my-nodes --node-type t3.small --managed --nodes 2
+    2  cat /root/.kube/config
+    3  cd /var/lib/jenkins/
+    4  vi config
+    5  pwd
+    6  ll
+    7  chmod 774 config
+======================================================================================================
+
+
+We have create the Deployment yaml for twistlock defender
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: twistlock-defender
+  labels:
+    app: twistlock-defender
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: twistlock-defender
+  template:
+    metadata:
+      labels:
+        app: twistlock-defender
+    spec:
+      containers:
+      - name: twistlock-defender
+        image: twistlock/defender:latest
+        imagePullPolicy: Alway
+
+
+
+
+===============================================================================================================================================================================================
+
+
+pipeline {
+    agent any
+    
+    environment {
+        AWS_DEFAULT_REGION = 'us-west-1'
+        EKS_CLUSTER_NAME = 'deploy-eks1'
+        KUBECONFIG = '/var/lib/jenkins/config'
+    }
+    
+    stages {
+        stage('Authenticate with AWS') {
+            steps {
+                script {
+                        sh "aws eks --region ${AWS_DEFAULT_REGION} update-kubeconfig --name ${EKS_CLUSTER_NAME} --kubeconfig ${KUBECONFIG}"
+                }
+            }
+        }
+        
+        stage('Deploy Defender for Cloud') {
+            steps {
+                script {
+                    sh "kubectl apply -f https://github.com/maven-web-app/blob/master/twist_lock.yml"
+                }
+            }
+        }
+        
+    }
+}
+
+
